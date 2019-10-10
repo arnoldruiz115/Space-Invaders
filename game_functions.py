@@ -3,6 +3,7 @@ import pygame
 from bullet import Bullet
 from alien import Alien
 from time import sleep
+from explosion import Explosion
 
 
 def get_number_rows(ai_settings, ship_height, alien_height):
@@ -126,18 +127,25 @@ def update_bullets(ai_settings, screen, stats, sb, ship, aliens, bullets):
 
 
 def check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, aliens, bullets):
-    collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+    collisions = pygame.sprite.groupcollide(aliens, bullets, True, True)
     if collisions:
+        for alien in collisions:
+            # Create new explosion
+            pass
         for aliens in collisions.values():
             stats.score += ai_settings.alien_points * len(aliens)
             sb.prep_score()
         check_high_score(stats, sb)
     if len(aliens) == 0:
         bullets.empty()
-        ai_settings.  increase_speed()
+        ai_settings.increase_speed()
         stats.level += 1
         sb.prep_level()
         create_fleet(ai_settings, screen, ship, aliens)
+
+
+def update_explosions(explosions):
+    explosions.update()
 
 
 def check_fleet_edges(ai_settings, aliens):

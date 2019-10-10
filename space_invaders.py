@@ -6,6 +6,7 @@ import game_functions as gf
 from game_stats import GameStats
 from button import Button
 from scoreboard import Scoreboard
+from explosion import Explosion
 
 
 def run_game():
@@ -17,6 +18,7 @@ def run_game():
     play_button = Button(screen, "Play")
     ship = Ship(ai_settings, screen)
     bullets = Group()
+    explosion = Group()
     aliens = Group()
     stats = GameStats(ai_settings)
     sb = Scoreboard(ai_settings, screen, stats)

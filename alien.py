@@ -41,7 +41,7 @@ class Alien(Sprite):
         self.types = {
             "alien1": self.alien_one,
             "alien2": self.alien_two,
-            "alien3": self.alien_three
+            "alien3": self.alien_three,
         }
 
         self.rect = self.one_a.get_rect()
