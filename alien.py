@@ -37,16 +37,11 @@ class Alien(Sprite):
         self.alien_three.append(self.three_a)
         self.alien_three.append(self.three_b)
 
-        # Images for UFO
-        self.ufo = pygame.image.load('images/mothership.png')
-        self.ufo = pygame.transform.scale(self.ufo, (64, 28))
-
         # Dictionary to refer to the aliens images
         self.types = {
             "alien1": self.alien_one,
             "alien2": self.alien_two,
-            "alien3": self.alien_three,
-            "ufo": self.ufo
+            "alien3": self.alien_three
         }
 
         self.rect = self.one_a.get_rect()

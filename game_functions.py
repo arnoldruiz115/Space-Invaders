@@ -4,20 +4,8 @@ from bullet import Bullet
 from alien import Alien
 from time import sleep
 from explosion import Explosion
-
-
-def get_number_rows(ai_settings, ship_height, alien_height):
-    available_space_y = (ai_settings.screen_height - (3 * alien_height) - ship_height)
-    number_rows = int(available_space_y / (2 * alien_height))
-    # return number_rows
-    return 5
-
-
-def get_number_aliens_x(ai_settings, alien_width):
-    available_space_x = ai_settings.screen_width - 2 * alien_width
-    number_aliens_x = int(available_space_x / (2 * alien_width))
-    # return number_aliens_x
-    return 11
+from ufo import UFO
+import random
 
 
 def create_alien(ai_settings, screen, aliens, alien_number, row_number):
@@ -33,16 +21,29 @@ def create_alien(ai_settings, screen, aliens, alien_number, row_number):
     alien_width = alien.rect.width
     alien.x = alien_width + 1.5 * alien_width * alien_number + offset
     alien.rect.x = alien.x
-    alien.rect.y = alien.rect.height + 1.5 * alien.rect.height * row_number
+    alien.rect.y = alien.rect.height + 1.5 * alien.rect.height * row_number + 100
     aliens.add(alien)
 
 
-def create_fleet(ai_settings, screen, ship, aliens):
-    alien = Alien(ai_settings, screen, "alien1")
-    number_aliens_x = get_number_aliens_x(ai_settings, alien.rect.width)
-    number_rows = get_number_rows(ai_settings, ship.rect.height, alien.rect.height)
-    for row_number in range(number_rows):
-        for alien_number in range(number_aliens_x):
+def update_ufos(ufos, ai_settings, screen):
+    current_tick = pygame.time.get_ticks()
+    if current_tick - ai_settings.start_tick > ai_settings.spawn_time:
+        ai_settings.spawn_time = random.randint(20000, 50000)
+        ai_settings.start_tick = current_tick
+        create_ufo(ai_settings, screen, ufos)
+    ufos.update()
+
+
+def create_ufo(ai_settings, screen, ufos):
+    ufo = UFO(ai_settings, screen)
+    ufo.rect.x = 10
+    ufo.rect.y = 600
+    ufos.add(ufo)
+
+
+def create_fleet(ai_settings, screen, aliens):
+    for row_number in range(5):
+        for alien_number in range(11):
             create_alien(ai_settings, screen, aliens, alien_number, row_number)
 
 
@@ -101,14 +102,16 @@ def check_play_button(ai_settings, screen, stats, sb, play_button, ship, aliens,
             sb.prep_ships()
             aliens.empty()
             bullets.empty()
-            create_fleet(ai_settings, screen, ship, aliens)
+            create_fleet(ai_settings, screen, aliens)
             ship.center_ship()
 
 
-def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_button):
+def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_button, explosions, ufos):
     screen.fill(ai_settings.bg_color)
     ship.blitme()
     aliens.draw(screen)
+    explosions.draw(screen)
+    ufos.draw(screen)
     for bullet in bullets.sprites():
         bullet.draw_bullet()
     sb.show_score()
@@ -118,15 +121,15 @@ def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_bu
     pygame.display.flip()
 
 
-def update_bullets(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions):
+def update_bullets(ai_settings, screen, stats, sb, aliens, bullets, explosions):
     bullets.update()
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
-    check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions)
+    check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets, explosions)
 
 
-def check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, aliens, bullets, explosions):
+def check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets, explosions):
     collisions = pygame.sprite.groupcollide(aliens, bullets, True, True)
     if collisions:
         for alien in collisions:
@@ -142,7 +145,7 @@ def check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, aliens, b
         ai_settings.increase_speed()
         stats.level += 1
         sb.prep_level()
-        create_fleet(ai_settings, screen, ship, aliens)
+        create_fleet(ai_settings, screen, aliens)
 
 
 def update_explosions(explosions):
@@ -177,7 +180,7 @@ def ship_hit(ai_settings, stats, sb, screen, ship, aliens, bullets):
         sb.prep_ships()
         aliens.empty()
         bullets.empty()
-        create_fleet(ai_settings, screen, ship, aliens)
+        create_fleet(ai_settings, screen, aliens)
         ship.center_ship()
         sleep(0.5)
     else:

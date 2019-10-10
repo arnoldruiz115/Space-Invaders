@@ -1,3 +1,6 @@
+import pygame
+import random
+
 class Settings:
     # A class to store all Settings
     def __init__(self):
@@ -26,6 +29,10 @@ class Settings:
         self.speedup_scale = 1.1
         self.score_scale = 1.5
         self.initialize_dynamic_settings()
+
+        # Random Event Settings
+        self.start_tick = pygame.time.get_ticks()
+        self.spawn_time = random.randint(20000, 50000)
 
     def initialize_dynamic_settings(self):
         self.ship_speed_factor = 1.5

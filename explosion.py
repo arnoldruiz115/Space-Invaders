@@ -17,6 +17,10 @@ class Explosion(Sprite):
         self.alien_explosion.append(self.explosion1)
         self.alien_explosion.append(self.explosion2)
 
+        self.rect = self.explosion1.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
         self.frame = 0
         self.image = self.alien_explosion[self.frame]
 
@@ -36,6 +40,7 @@ class Explosion(Sprite):
             if self.frame >= len(self.alien_explosion):
                 self.frame = 0
         self.image = self.alien_explosion[self.frame]
-        self.x += self.ai_settings.fleet_direction * self.ai_settings.alien_speed_factor
+        self.rect.x += self.ai_settings.fleet_direction * self.ai_settings.alien_speed_factor
+
+    def blitme(self):
         self.screen.blit(self.image, (self.x, self.y))
-        pygame.display.update()
