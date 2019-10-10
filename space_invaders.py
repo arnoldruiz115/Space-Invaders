@@ -10,6 +10,7 @@ from scoreboard import Scoreboard
 
 def run_game():
     pygame.init()
+    main_clock = pygame.time.Clock()
     ai_settings = Settings()
     screen = pygame.display.set_mode((ai_settings.screen_width, ai_settings.screen_height))
     pygame.display.set_caption("Space Invaders")
@@ -32,6 +33,7 @@ def run_game():
                              aliens=aliens, ship=ship, bullets=bullets)
         gf.update_screen(ai_settings=ai_settings, screen=screen, ship=ship, sb=sb, aliens=aliens, bullets=bullets,
                          play_button=play_button, stats=stats)
+        main_clock.tick(120)
 
 
 run_game()

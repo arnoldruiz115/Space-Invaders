@@ -1,8 +1,8 @@
 class Settings:
     # A class to store all Settings
     def __init__(self):
-        self.screen_width = 1200
-        self.screen_height = 800
+        self.screen_width = 1024
+        self.screen_height = 896
         self.bg_color = (20, 44, 71)
         self.ship_speed_factor = None
         self.ship_limit = 3
@@ -12,7 +12,7 @@ class Settings:
         self.bullet_width = 3
         self.bullet_height = 15
         self.bullet_color = (252, 173, 3)
-        self.bullets_allowed = 3
+        self.bullets_allowed = 1
 
         # Alien settings
         self.alien_speed_factor = None
@@ -29,7 +29,7 @@ class Settings:
 
     def initialize_dynamic_settings(self):
         self.ship_speed_factor = 1.5
-        self.bullet_speed_factor = 3
+        self.bullet_speed_factor = 8
         self.alien_speed_factor = 1
         self.fleet_direction = 1
 
