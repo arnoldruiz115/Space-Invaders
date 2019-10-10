@@ -36,8 +36,8 @@ def update_ufos(ufos, ai_settings, screen):
 
 def create_ufo(ai_settings, screen, ufos):
     ufo = UFO(ai_settings, screen)
-    ufo.rect.x = 10
-    ufo.rect.y = 600
+    ufo.rect.x = -10
+    ufo.rect.y = 80
     ufos.add(ufo)
 
 
@@ -116,28 +116,31 @@ def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_bu
         bullet.draw_bullet()
     sb.show_score()
     if not stats.game_active:
+        draw_main_screen(screen)
         play_button.draw_button()
-
     pygame.display.flip()
 
 
-def update_bullets(ai_settings, screen, stats, sb, aliens, bullets, explosions):
+def update_bullets(ai_settings, screen, stats, sb, aliens, bullets, explosions, ufos):
     bullets.update()
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
     check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets, explosions)
+    check_ufo_bullet_collision(ufos=ufos, bullets=bullets, stats=stats, sb=sb)
 
 
 def check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets, explosions):
     collisions = pygame.sprite.groupcollide(aliens, bullets, True, True)
+    alien_points = 0
     if collisions:
         for alien in collisions:
             # Create new explosion
             explosion = Explosion(screen=screen, x=alien.rect.x, y=alien.rect.y, ai_settings=ai_settings)
             explosions.add(explosion)
+            alien_points += ai_settings.alien_points[alien.alien_type]
         for aliens in collisions.values():
-            stats.score += ai_settings.alien_points * len(aliens)
+            stats.score += alien_points
             sb.prep_score()
         check_high_score(stats, sb)
     if len(aliens) == 0:
@@ -146,6 +149,20 @@ def check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets
         stats.level += 1
         sb.prep_level()
         create_fleet(ai_settings, screen, aliens)
+
+
+def check_ufo_bullet_collision(ufos, bullets, stats, sb):
+    collision = pygame.sprite.groupcollide(ufos, bullets, False, True)
+    ufo_value = 0
+    if collision:
+        for ufo in collision:
+            ufo.destroy_ufo()
+            ufo_value = ufo.point_value
+            print("Ufo dead at {}, {}. Points = {}".format(ufo.rect.x, ufo.rect.y, ufo.point_value))
+        for ufos in collision.values():
+            stats.score += ufo_value * len(ufos)
+            sb.prep_score()
+        check_high_score(stats, sb)
 
 
 def update_explosions(explosions):
@@ -201,3 +218,7 @@ def check_high_score(stats, sb):
     if stats.score > stats.high_score:
         stats.high_score = stats.score
         sb.prep_high_score()
+
+
+def draw_main_screen(screen):
+    screen.fill((0, 0, 0))

@@ -1,6 +1,7 @@
 import pygame
 import random
 
+
 class Settings:
     # A class to store all Settings
     def __init__(self):
@@ -23,7 +24,7 @@ class Settings:
         self.fleet_direction = 1
 
         # Scoring
-        self.alien_points = 50
+        self.alien_points = []
 
         # Level Settings
         self.speedup_scale = 1.1
@@ -32,9 +33,14 @@ class Settings:
 
         # Random Event Settings
         self.start_tick = pygame.time.get_ticks()
-        self.spawn_time = random.randint(20000, 50000)
+        self.spawn_time = random.randint(15000, 25000)
 
     def initialize_dynamic_settings(self):
+        self.alien_points = {
+            "alien1": 10,
+            "alien2": 20,
+            "alien3": 40
+        }
         self.ship_speed_factor = 1.5
         self.bullet_speed_factor = 8
         self.alien_speed_factor = 1
@@ -44,4 +50,6 @@ class Settings:
         self.ship_speed_factor *= self.speedup_scale
         self.bullet_speed_factor *= self.speedup_scale
         self.alien_speed_factor *= self.speedup_scale
-        self.alien_points = int(self.alien_points * self.score_scale)
+        for i in self.alien_points:
+            self.alien_points[i] = int(self.alien_points[i] * self.score_scale)
+            print(self.alien_points[i])

@@ -40,7 +40,8 @@ class Explosion(Sprite):
             if self.frame >= len(self.alien_explosion):
                 self.frame = 0
         self.image = self.alien_explosion[self.frame]
-        self.rect.x += self.ai_settings.fleet_direction * self.ai_settings.alien_speed_factor
+        self.x += (self.ai_settings.alien_speed_factor * self.ai_settings.fleet_direction)
+        self.rect.x = self.x
 
     def blitme(self):
         self.screen.blit(self.image, (self.x, self.y))

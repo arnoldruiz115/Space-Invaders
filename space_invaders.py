@@ -6,7 +6,6 @@ import game_functions as gf
 from game_stats import GameStats
 from button import Button
 from scoreboard import Scoreboard
-import random
 
 
 def run_game():
@@ -23,7 +22,7 @@ def run_game():
     aliens = Group()
     stats = GameStats(ai_settings)
     sb = Scoreboard(ai_settings, screen, stats)
-    gf.create_fleet(ai_settings, screen, aliens)  
+    gf.create_fleet(ai_settings, screen, aliens)
 
     # Main loop for the game
     while True:
@@ -32,7 +31,7 @@ def run_game():
         if stats.game_active:
             ship.update()
             gf.update_bullets(ai_settings=ai_settings, screen=screen, stats=stats, sb=sb, aliens=aliens,
-                              bullets=bullets, explosions=explosions)
+                              bullets=bullets, explosions=explosions, ufos=ufos)
             gf.update_aliens(ai_settings=ai_settings, stats=stats, screen=screen, sb=sb,
                              aliens=aliens, ship=ship, bullets=bullets)
             gf.update_explosions(explosions=explosions)
