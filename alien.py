@@ -4,11 +4,11 @@ from pygame.sprite import Sprite
 
 class Alien(Sprite):
 
-    def __init__(self, ai_settings, screen, type):
+    def __init__(self, ai_settings, screen, alien_type):
         super(Alien, self).__init__()
         self.screen = screen
         self.ai_settings = ai_settings
-        self.alien_type = type
+        self.alien_type = alien_type
 
         # Images for the first alien type
         self.alien_one = []
@@ -37,11 +37,16 @@ class Alien(Sprite):
         self.alien_three.append(self.three_a)
         self.alien_three.append(self.three_b)
 
+        # Images for UFO
+        self.ufo = pygame.image.load('images/mothership.png')
+        self.ufo = pygame.transform.scale(self.ufo, (64, 28))
+
         # Dictionary to refer to the aliens images
         self.types = {
             "alien1": self.alien_one,
             "alien2": self.alien_two,
             "alien3": self.alien_three,
+            "ufo": self.ufo
         }
 
         self.rect = self.one_a.get_rect()
