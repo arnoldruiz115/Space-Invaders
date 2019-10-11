@@ -6,6 +6,7 @@ from time import sleep
 from explosion import Explosion
 from ufo import UFO
 import random
+import json
 
 
 def create_alien(ai_settings, screen, aliens, alien_number, row_number):
@@ -73,7 +74,7 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def check_events(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets):
+def check_events(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets, score_button, back_button):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -81,32 +82,49 @@ def check_events(ai_settings, screen, stats, sb, play_button, ship, aliens, bull
             mouse_x, mouse_y = pygame.mouse.get_pos()
             check_play_button(ai_settings=ai_settings, screen=screen, stats=stats, sb=sb, play_button=play_button,
                               ship=ship, aliens=aliens, bullets=bullets, mouse_x=mouse_x, mouse_y=mouse_y)
-
+            check_score_button(score_button=score_button, stats=stats,
+                               mouse_x=mouse_x, mouse_y=mouse_y)
+            check_back_button(back_button=back_button, stats=stats, mouse_x=mouse_x, mouse_y=mouse_y)
         elif event.type == pygame.KEYDOWN:
             check_keydown_events(event, ai_settings, screen, ship, bullets)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
 
 
+def check_score_button(score_button, stats, mouse_x, mouse_y):
+    button_clicked = score_button.rect.collidepoint(mouse_x, mouse_y)
+    if button_clicked:
+        stats.score_screen_active = True
+
+
+def check_back_button(back_button, stats, mouse_x, mouse_y):
+    button_clicked = back_button.rect.collidepoint(mouse_x, mouse_y)
+    if button_clicked:
+        stats.score_screen_active = False
+
+
 def check_play_button(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets, mouse_x, mouse_y):
     button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
-    if button_clicked and not stats.game_active:
-        ai_settings.initialize_dynamic_settings()
-        pygame.mouse.set_visible(False)
-        if play_button.rect.collidepoint(mouse_x, mouse_y):
-            stats.reset_stats()
-            stats.game_active = True
-            sb.prep_score()
-            sb.prep_high_score()
-            sb.prep_level()
-            sb.prep_ships()
-            aliens.empty()
-            bullets.empty()
-            create_fleet(ai_settings, screen, aliens)
-            ship.center_ship()
+    if not stats.score_screen_active:
+        if button_clicked and not stats.game_active:
+            ai_settings.initialize_dynamic_settings()
+            pygame.mouse.set_visible(False)
+            if play_button.rect.collidepoint(mouse_x, mouse_y):
+                stats.reset_stats()
+                stats.game_active = True
+                ai_settings.start_game_timer()
+                sb.prep_score()
+                sb.prep_high_score()
+                sb.prep_level()
+                sb.prep_ships()
+                aliens.empty()
+                bullets.empty()
+                create_fleet(ai_settings, screen, aliens)
+                ship.center_ship()
 
 
-def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_button, explosions, ufos):
+def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_button, explosions, ufos, score_button,
+                  back_button):
     screen.fill(ai_settings.bg_color)
     ship.blitme()
     aliens.draw(screen)
@@ -115,9 +133,10 @@ def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_bu
     for bullet in bullets.sprites():
         bullet.draw_bullet()
     sb.show_score()
-    if not stats.game_active:
-        draw_main_screen(screen)
-        play_button.draw_button()
+    if stats.score_screen_active:
+        draw_high_score_screen(ai_settings=ai_settings, screen=screen, back_button=back_button)
+    if not stats.game_active and not stats.score_screen_active:
+        draw_main_screen(ai_settings, screen, play_button, score_button)
     pygame.display.flip()
 
 
@@ -158,7 +177,6 @@ def check_ufo_bullet_collision(ufos, bullets, stats, sb):
         for ufo in collision:
             ufo.destroy_ufo()
             ufo_value = ufo.point_value
-            print("Ufo dead at {}, {}. Points = {}".format(ufo.rect.x, ufo.rect.y, ufo.point_value))
         for ufos in collision.values():
             stats.score += ufo_value * len(ufos)
             sb.prep_score()
@@ -220,5 +238,102 @@ def check_high_score(stats, sb):
         sb.prep_high_score()
 
 
-def draw_main_screen(screen):
+def draw_main_screen(ai_settings, screen, play_button, score_button):
     screen.fill((0, 0, 0))
+    # Title
+    title_font = pygame.font.SysFont(None, 135, bold=True)
+    title_text = title_font.render("SPACE", 1, (255, 255, 255))
+    title_rect = title_text.get_rect()
+    title_rect.center = ai_settings.screen_width / 2, 100
+    screen.blit(title_text, title_rect)
+
+    title2_font = pygame.font.SysFont(None, 82, bold=True)
+    title2_text = title2_font.render("INVADERS", 1, (50, 255, 50))
+    title2_rect = title2_text.get_rect()
+    title2_rect.center = ai_settings.screen_width / 2, 175
+    screen.blit(title2_text, title2_rect)
+
+    # Alien Images
+    alien1 = pygame.image.load('images/alien1a.png')
+    alien1 = pygame.transform.scale(alien1, (48, 32))
+    alien1_rect = alien1.get_rect()
+    alien1_rect.topleft = (ai_settings.screen_width / 2 - 24 - 100, 300)
+
+    alien2 = pygame.image.load('images/alien2a.png')
+    alien2 = pygame.transform.scale(alien2, (44, 32))
+    alien2_rect = alien2.get_rect()
+    alien2_rect.topleft = (ai_settings.screen_width / 2 - 22 - 100, 375)
+
+    alien3 = pygame.image.load('images/alien3a.png')
+    alien3 = pygame.transform.scale(alien3, (32, 32))
+    alien3_rect = alien3.get_rect()
+    alien3_rect.topleft = (ai_settings.screen_width / 2 - 16 - 100, 450)
+
+    ufo = pygame.image.load('images/mothership.png')
+    ufo = pygame.transform.scale(ufo, (64, 28))
+    ufo_rect = ufo.get_rect()
+    ufo_rect.topleft = (ai_settings.screen_width / 2 - 32 - 100, 525)
+
+    scores_font = pygame.font.SysFont(None, 48)
+    score1_text = scores_font.render("= 10 PTS", 1, (255, 255, 255))
+    score1_rect = score1_text.get_rect()
+    score1_rect.topleft = (ai_settings.screen_width / 2 - 50, 300)
+    screen.blit(score1_text, score1_rect)
+
+    score2_text = scores_font.render("= 20 PTS", 1, (255, 255, 255))
+    score2_rect = score2_text.get_rect()
+    score2_rect.topleft = (ai_settings.screen_width / 2 - 50, 375)
+    screen.blit(score2_text, score2_rect)
+
+    score3_text = scores_font.render("= 40 PTS", 1, (255, 255, 255))
+    score3_rect = score3_text.get_rect()
+    score3_rect.topleft = (ai_settings.screen_width / 2 - 50, 450)
+    screen.blit(score3_text, score3_rect)
+
+    ufo_text = scores_font.render("= ??? PTS", 1, (255, 255, 255))
+    ufo_text_rect = ufo_text.get_rect()
+    ufo_text_rect.topleft = (ai_settings.screen_width / 2 - 50, 525)
+    screen.blit(ufo_text, ufo_text_rect)
+
+    screen.blit(alien1, alien1_rect)
+    screen.blit(alien2, alien2_rect)
+    screen.blit(alien3, alien3_rect)
+    screen.blit(ufo, ufo_rect)
+    score_button.draw_button()
+    play_button.draw_button()
+
+
+def draw_high_score_screen(ai_settings, screen, back_button):
+    screen.fill((0, 0, 0))
+    back_button.draw_button()
+
+    # Title
+    title_font = pygame.font.SysFont(None, 82, bold=True)
+    title_text = title_font.render("High Scores", 1, (230, 55, 55))
+    title_rect = title_text.get_rect()
+    title_rect.center = ai_settings.screen_width / 2, 100
+    screen.blit(title_text, title_rect)
+
+    # Read scores file
+    with open('scores.json') as file:
+        scores = json.load(file)
+
+    # Scores
+    scores_font = pygame.font.SysFont('Consolas', 48)
+    offset = 0
+    for score in scores['scores']:
+        place_text = scores_font.render("{}".format(offset + 1), 1, (111, 217, 122))
+        place_rect = place_text.get_rect()
+        place_rect.topright = ai_settings.screen_width / 2 - 200, 200 + offset * 50
+        screen.blit(place_text, place_rect)
+
+        score_text = scores_font.render("{}".format(score['score']), 1, (247, 217, 132))
+        score_rect = score_text.get_rect()
+        score_rect.topleft = ai_settings.screen_width / 2 + 50, 200 + offset * 50
+        screen.blit(score_text, score_rect)
+
+        name_text = scores_font.render("{}".format(score['name']), 1, (247, 217, 132))
+        name_rect = name_text.get_rect()
+        name_rect.topleft = ai_settings.screen_width / 2 + 175, 200 + offset * 50
+        screen.blit(name_text, name_rect)
+        offset += 1

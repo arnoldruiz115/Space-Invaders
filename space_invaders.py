@@ -14,7 +14,9 @@ def run_game():
     ai_settings = Settings()
     screen = pygame.display.set_mode((ai_settings.screen_width, ai_settings.screen_height))
     pygame.display.set_caption("Space Invaders")
-    play_button = Button(screen, "Play")
+    play_button = Button(screen, "Play", ai_settings.screen_width / 2, 700)
+    scores_button = Button(screen, "High Scores", ai_settings.screen_width / 2, 800)
+    back_button = Button(screen, "Back", 150, 75)
     ship = Ship(ai_settings, screen)
     bullets = Group()
     explosions = Group()
@@ -27,7 +29,7 @@ def run_game():
     # Main loop for the game
     while True:
         gf.check_events(ai_settings=ai_settings, screen=screen, stats=stats, ship=ship, sb=sb, play_button=play_button,
-                        bullets=bullets, aliens=aliens)
+                        bullets=bullets, aliens=aliens, score_button=scores_button, back_button=back_button)
         if stats.game_active:
             ship.update()
             gf.update_bullets(ai_settings=ai_settings, screen=screen, stats=stats, sb=sb, aliens=aliens,
@@ -38,7 +40,8 @@ def run_game():
             gf.update_ufos(ufos=ufos, screen=screen, ai_settings=ai_settings)
 
         gf.update_screen(ai_settings=ai_settings, screen=screen, ship=ship, sb=sb, aliens=aliens, bullets=bullets,
-                         play_button=play_button, stats=stats, explosions=explosions, ufos=ufos)
+                         play_button=play_button, stats=stats, explosions=explosions, ufos=ufos,
+                         score_button=scores_button, back_button=back_button)
         main_clock.tick(120)
 
 

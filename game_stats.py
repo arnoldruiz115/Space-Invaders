@@ -2,6 +2,7 @@ class GameStats:
     def __init__(self, ai_settings):
         self.ai_settings = ai_settings
         self.game_active = False
+        self.score_screen_active = False
         self.ships_left = None
         self.score = None
         self.level = None
