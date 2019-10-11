@@ -61,8 +61,6 @@ class Settings:
             self.min_shot_time = int(self.min_shot_time / self.shot_frequency_factor)
             if self.min_shot_time < 0:
                 self.min_shot_time = 0
-        print(self.min_shot_time)
-        print(self.max_shot_time)
         if self.max_shot_time != 1000:
             self.max_shot_time = int(self.max_shot_time / self.shot_frequency_factor)
             if self.max_shot_time < 1000:

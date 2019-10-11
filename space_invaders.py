@@ -22,6 +22,7 @@ def run_game():
     lasers = Group()
     explosions = Group()
     ufos = Group()
+    bunkers = Group()
     aliens = Group()
     stats = GameStats(ai_settings)
     sb = Scoreboard(ai_settings, screen, stats)
@@ -30,20 +31,22 @@ def run_game():
     # Main loop for the game
     while True:
         gf.check_events(ai_settings=ai_settings, screen=screen, stats=stats, ship=ship, sb=sb, play_button=play_button,
-                        bullets=bullets, aliens=aliens, score_button=scores_button, back_button=back_button)
+                        bullets=bullets, aliens=aliens, score_button=scores_button,
+                        back_button=back_button, bunkers=bunkers)
         if stats.game_active:
             ship.update()
             gf.update_bullets(ai_settings=ai_settings, screen=screen, stats=stats, sb=sb, aliens=aliens,
-                              bullets=bullets, explosions=explosions, ufos=ufos)
+                              bullets=bullets, explosions=explosions, ufos=ufos, bunkers=bunkers)
             gf.update_aliens(ai_settings=ai_settings, stats=stats, screen=screen, sb=sb,
                              aliens=aliens, ship=ship, bullets=bullets, lasers=lasers)
             gf.update_explosions(explosions=explosions)
             gf.update_ufos(ufos=ufos, screen=screen, ai_settings=ai_settings)
             gf.update_lasers(lasers=lasers)
+            gf.update_bunkers(bunkers=bunkers)
 
         gf.update_screen(ai_settings=ai_settings, screen=screen, ship=ship, sb=sb, aliens=aliens, bullets=bullets,
                          play_button=play_button, stats=stats, explosions=explosions, ufos=ufos,
-                         score_button=scores_button, back_button=back_button, lasers=lasers)
+                         score_button=scores_button, back_button=back_button, lasers=lasers, bunkers=bunkers)
         main_clock.tick(120)
 
 

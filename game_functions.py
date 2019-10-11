@@ -5,6 +5,7 @@ from alien import Alien
 from time import sleep
 from explosion import Explosion
 from ufo import UFO
+from bunker import Bunker
 import random
 import json
 
@@ -29,6 +30,10 @@ def create_alien(ai_settings, screen, aliens, alien_number, row_number, column):
     aliens.add(alien)
 
 
+def update_bunkers(bunkers):
+    bunkers.update()
+
+
 def update_ufos(ufos, ai_settings, screen):
     current_tick = pygame.time.get_ticks()
     if current_tick - ai_settings.start_tick > ai_settings.spawn_time:
@@ -43,6 +48,12 @@ def create_ufo(ai_settings, screen, ufos):
     ufo.rect.x = -10
     ufo.rect.y = 80
     ufos.add(ufo)
+
+
+def create_bunkers(bunkers, screen):
+    for i in range(4):
+        bunker = Bunker(screen=screen, x=(150 + (200 * i)), y=600)
+        bunkers.add(bunker)
 
 
 def create_fleet(ai_settings, screen, aliens):
@@ -79,14 +90,16 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def check_events(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets, score_button, back_button):
+def check_events(ai_settings, screen, stats, sb, play_button, ship, aliens,
+                 bullets, score_button, back_button, bunkers):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             check_play_button(ai_settings=ai_settings, screen=screen, stats=stats, sb=sb, play_button=play_button,
-                              ship=ship, aliens=aliens, bullets=bullets, mouse_x=mouse_x, mouse_y=mouse_y)
+                              ship=ship, aliens=aliens, bullets=bullets,
+                              mouse_x=mouse_x, mouse_y=mouse_y, bunkers=bunkers)
             check_score_button(score_button=score_button, stats=stats,
                                mouse_x=mouse_x, mouse_y=mouse_y)
             check_back_button(back_button=back_button, stats=stats, mouse_x=mouse_x, mouse_y=mouse_y)
@@ -108,7 +121,7 @@ def check_back_button(back_button, stats, mouse_x, mouse_y):
         stats.score_screen_active = False
 
 
-def check_play_button(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets, mouse_x, mouse_y):
+def check_play_button(ai_settings, screen, stats, sb, play_button, ship, aliens, bullets, mouse_x, mouse_y, bunkers):
     button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
     if not stats.score_screen_active:
         if button_clicked and not stats.game_active:
@@ -125,20 +138,22 @@ def check_play_button(ai_settings, screen, stats, sb, play_button, ship, aliens,
                 aliens.empty()
                 bullets.empty()
                 create_fleet(ai_settings, screen, aliens)
+                create_bunkers(bunkers=bunkers, screen=screen)
                 ship.center_ship()
 
 
 def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_button, explosions, ufos, score_button,
-                  back_button, lasers):
+                  back_button, lasers, bunkers):
     screen.fill(ai_settings.bg_color)
     ship.blitme()
+    # Draw pixels
+    bunkers.draw(screen)
     aliens.draw(screen)
     explosions.draw(screen)
     ufos.draw(screen)
     for laser in lasers.sprites():
         laser.draw_laser()
-    for bullet in bullets.sprites():
-        bullet.draw_bullet()
+    bullets.draw(screen)
     sb.show_score()
     if stats.score_screen_active:
         draw_high_score_screen(ai_settings=ai_settings, screen=screen, back_button=back_button)
@@ -147,17 +162,23 @@ def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_bu
     pygame.display.flip()
 
 
-def update_bullets(ai_settings, screen, stats, sb, aliens, bullets, explosions, ufos):
+def update_lasers(lasers):
+    lasers.update()
+
+
+def update_bullets(ai_settings, screen, stats, sb, aliens, bullets, explosions, ufos, bunkers):
     bullets.update()
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
     check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets, explosions)
     check_ufo_bullet_collision(ufos=ufos, bullets=bullets, stats=stats, sb=sb)
+    check_bunker_bullet_collision(bullets=bullets, bunkers=bunkers)
 
 
-def update_lasers(lasers):
-    lasers.update()
+def check_bunker_bullet_collision(bullets, bunkers):
+    if pygame.sprite.groupcollide(bunkers, bullets, False, True):
+        pass
 
 
 def check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets, explosions):
