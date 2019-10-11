@@ -9,16 +9,19 @@ import random
 import json
 
 
-def create_alien(ai_settings, screen, aliens, alien_number, row_number):
+def create_alien(ai_settings, screen, aliens, alien_number, row_number, column):
     offset = 0
     if row_number < 3:
         alien = Alien(ai_settings, screen, "alien2")
         offset = 2
     else:
         alien = Alien(ai_settings, screen, "alien1")
+        if row_number == 4:
+            alien.can_shoot = True
     if row_number == 0:
         alien = Alien(ai_settings, screen, "alien3")
         offset = 8
+    alien.column_number = column
     alien_width = alien.rect.width
     alien.x = alien_width + 1.5 * alien_width * alien_number + offset
     alien.rect.x = alien.x
@@ -44,8 +47,10 @@ def create_ufo(ai_settings, screen, ufos):
 
 def create_fleet(ai_settings, screen, aliens):
     for row_number in range(5):
+        column_count = 0
         for alien_number in range(11):
-            create_alien(ai_settings, screen, aliens, alien_number, row_number)
+            create_alien(ai_settings, screen, aliens, alien_number, row_number, column_count)
+            column_count += 1
 
 
 def fire_bullet(ai_settings, screen, ship, bullets):
@@ -124,12 +129,14 @@ def check_play_button(ai_settings, screen, stats, sb, play_button, ship, aliens,
 
 
 def update_screen(ai_settings, screen, stats, sb, ship, aliens, bullets, play_button, explosions, ufos, score_button,
-                  back_button):
+                  back_button, lasers):
     screen.fill(ai_settings.bg_color)
     ship.blitme()
     aliens.draw(screen)
     explosions.draw(screen)
     ufos.draw(screen)
+    for laser in lasers.sprites():
+        laser.draw_laser()
     for bullet in bullets.sprites():
         bullet.draw_bullet()
     sb.show_score()
@@ -149,6 +156,10 @@ def update_bullets(ai_settings, screen, stats, sb, aliens, bullets, explosions, 
     check_ufo_bullet_collision(ufos=ufos, bullets=bullets, stats=stats, sb=sb)
 
 
+def update_lasers(lasers):
+    lasers.update()
+
+
 def check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets, explosions):
     collisions = pygame.sprite.groupcollide(aliens, bullets, True, True)
     alien_points = 0
@@ -158,6 +169,22 @@ def check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets
             explosion = Explosion(screen=screen, x=alien.rect.x, y=alien.rect.y, ai_settings=ai_settings)
             explosions.add(explosion)
             alien_points += ai_settings.alien_points[alien.alien_type]
+            # Check if alien can shoot, if true, check for closest alien above it to grant it shooting ability
+            if alien.can_shoot:
+                inline = []
+                column = alien.column_number
+                height = 0
+                for next_shooter in aliens:
+                    if next_shooter.column_number == column:
+                        inline.append(next_shooter)
+                        if next_shooter.rect.y > height:
+                            height = next_shooter.rect.y
+                if inline:
+                    for target in inline:
+                        if target.rect.y == height:
+                            target.can_shoot = True
+                            break
+
         for aliens in collisions.values():
             stats.score += alien_points
             sb.prep_score()
@@ -171,7 +198,7 @@ def check_bullet_alien_collision(ai_settings, screen, stats, sb, aliens, bullets
 
 
 def check_ufo_bullet_collision(ufos, bullets, stats, sb):
-    collision = pygame.sprite.groupcollide(ufos, bullets, False, True)
+    collision = pygame.sprite.groupcollide(ufos, bullets, True, True)
     ufo_value = 0
     if collision:
         for ufo in collision:
@@ -200,9 +227,9 @@ def change_fleet_direction(ai_settings, aliens):
     ai_settings.fleet_direction *= -1
 
 
-def update_aliens(ai_settings, stats, screen, sb, aliens, ship, bullets):
+def update_aliens(ai_settings, stats, screen, sb, aliens, ship, bullets, lasers):
     check_fleet_edges(ai_settings, aliens)
-    aliens.update()
+    aliens.update(lasers)
 
     if pygame.sprite.spritecollideany(ship, aliens):
         ship_hit(ai_settings, stats, sb, screen, ship, aliens, bullets)
@@ -210,7 +237,7 @@ def update_aliens(ai_settings, stats, screen, sb, aliens, ship, bullets):
 
 
 def ship_hit(ai_settings, stats, sb, screen, ship, aliens, bullets):
-    if stats.ships_left > 0:
+    if stats.ships_left > 1:
         stats.ships_left -= 1
         sb.prep_ships()
         aliens.empty()

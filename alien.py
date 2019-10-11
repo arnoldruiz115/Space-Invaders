@@ -1,5 +1,7 @@
 import pygame
 from pygame.sprite import Sprite
+import random
+from alien_laser import AlienLaser
 
 
 class Alien(Sprite):
@@ -9,6 +11,12 @@ class Alien(Sprite):
         self.screen = screen
         self.ai_settings = ai_settings
         self.alien_type = alien_type
+        self.can_shoot = False
+        self.column_number = None
+        self.fire_timer = pygame.time.get_ticks()
+        self.min_shot_time = self.ai_settings.min_shot_time
+        self.max_shot_time = self.ai_settings.max_shot_time
+        self.time_until_shot = random.randint(1000, self.max_shot_time)
 
         # Images for the first alien type
         self.alien_one = []
@@ -55,10 +63,20 @@ class Alien(Sprite):
 
         self.x = float(self.rect.x)
 
-    def update(self):
+    def update(self, lasers):
         self.x += (self.ai_settings.alien_speed_factor * self.ai_settings.fleet_direction)
         self.rect.x = self.x
+        if self.can_shoot:
+            self.shoot_laser(lasers)
         self.animate()
+
+    def shoot_laser(self, lasers):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.fire_timer > self.time_until_shot:
+            self.fire_timer = current_time
+            self.time_until_shot = random.randint(self.min_shot_time, self.max_shot_time)
+            shot = AlienLaser(self.ai_settings, self.screen, self)
+            lasers.add(shot)
 
     def blitme(self):
         self.screen.blit(self.image, self.rect)

@@ -19,6 +19,7 @@ def run_game():
     back_button = Button(screen, "Back", 150, 75)
     ship = Ship(ai_settings, screen)
     bullets = Group()
+    lasers = Group()
     explosions = Group()
     ufos = Group()
     aliens = Group()
@@ -35,13 +36,14 @@ def run_game():
             gf.update_bullets(ai_settings=ai_settings, screen=screen, stats=stats, sb=sb, aliens=aliens,
                               bullets=bullets, explosions=explosions, ufos=ufos)
             gf.update_aliens(ai_settings=ai_settings, stats=stats, screen=screen, sb=sb,
-                             aliens=aliens, ship=ship, bullets=bullets)
+                             aliens=aliens, ship=ship, bullets=bullets, lasers=lasers)
             gf.update_explosions(explosions=explosions)
             gf.update_ufos(ufos=ufos, screen=screen, ai_settings=ai_settings)
+            gf.update_lasers(lasers=lasers)
 
         gf.update_screen(ai_settings=ai_settings, screen=screen, ship=ship, sb=sb, aliens=aliens, bullets=bullets,
                          play_button=play_button, stats=stats, explosions=explosions, ufos=ufos,
-                         score_button=scores_button, back_button=back_button)
+                         score_button=scores_button, back_button=back_button, lasers=lasers)
         main_clock.tick(120)
 
 

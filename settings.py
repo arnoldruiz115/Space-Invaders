@@ -9,7 +9,7 @@ class Settings:
         self.screen_height = 896
         self.bg_color = (20, 44, 71)
         self.ship_speed_factor = None
-        self.ship_limit = 0
+        self.ship_limit = 3
 
         # Bullet Settings
         self.bullet_speed_factor = None
@@ -22,6 +22,10 @@ class Settings:
         self.alien_speed_factor = None
         self.fleet_drop_speed = 10
         self.fleet_direction = 1
+        self.laser_speed_factor = None
+        self.min_shot_time = None
+        self.max_shot_time = None
+        self.shot_frequency_factor = 1.5
 
         # Scoring
         self.alien_points = []
@@ -41,15 +45,29 @@ class Settings:
             "alien2": 20,
             "alien3": 40
         }
+        self.laser_speed_factor = 4
         self.ship_speed_factor = 1.5
         self.bullet_speed_factor = 8
         self.alien_speed_factor = 1
         self.fleet_direction = 1
+        self.min_shot_time = 5000
+        self.max_shot_time = 15000
 
     def start_game_timer(self):
         self.start_tick = pygame.time.get_ticks()
 
     def increase_speed(self):
+        if self.min_shot_time != 0:
+            self.min_shot_time = int(self.min_shot_time / self.shot_frequency_factor)
+            if self.min_shot_time < 0:
+                self.min_shot_time = 0
+        print(self.min_shot_time)
+        print(self.max_shot_time)
+        if self.max_shot_time != 1000:
+            self.max_shot_time = int(self.max_shot_time / self.shot_frequency_factor)
+            if self.max_shot_time < 1000:
+                self.max_shot_time = 1000
+
         self.ship_speed_factor *= self.speedup_scale
         self.bullet_speed_factor *= self.speedup_scale
         self.alien_speed_factor *= self.speedup_scale
