@@ -219,6 +219,23 @@ def ship_hit(ai_settings, stats, sb, screen, ship, aliens, bullets):
         ship.center_ship()
         sleep(0.5)
     else:
+        # Game is Over
+        # Read High Scores
+        game_score = stats.score
+        with open('scores.json') as file:
+            scores = json.load(file)
+
+        for score in scores['scores']:
+            if game_score > score['score']:
+                stats.input_name_active = True
+                while stats.input_name_active:
+                    display_enter_name_box(ai_settings=ai_settings, screen=screen, stats=stats)
+                    score['score'] = game_score
+                    score['name'] = stats.player_name.upper()
+                    with open('scores.json', 'w') as outfile:
+                        json.dump(scores, outfile, indent=4)
+                break
+
         stats.game_active = False
         pygame.mouse.set_visible(True)
 
@@ -337,3 +354,31 @@ def draw_high_score_screen(ai_settings, screen, back_button):
         name_rect.topleft = ai_settings.screen_width / 2 + 175, 200 + offset * 50
         screen.blit(name_text, name_rect)
         offset += 1
+
+
+def display_enter_name_box(ai_settings, screen, stats):
+    screen.fill((0, 0, 0))
+
+    # Text
+    enter_font = pygame.font.SysFont(None, 48)
+    enter_name_text = enter_font.render("Enter your Name (3 Letters)", 1, (255, 255, 255))
+    enter_name_rect = enter_name_text.get_rect()
+    enter_name_rect.center = (ai_settings.screen_width/2, 100)
+    screen.blit(enter_name_text, enter_name_rect)
+
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                stats.input_name_active = False
+            elif event.key == pygame.K_BACKSPACE:
+                stats.player_name = stats.player_name[:-1]
+            elif len(stats.player_name) < 3:
+                stats.player_name += event.unicode
+
+    # Input Box
+    input_box = enter_font.render(stats.player_name.upper(), 1, (255, 255, 255))
+    input_rect = input_box.get_rect()
+    input_rect.center = (ai_settings.screen_width/2, 200)
+    screen.blit(input_box, input_rect)
+
+    pygame.display.update()

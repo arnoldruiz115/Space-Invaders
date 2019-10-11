@@ -9,7 +9,7 @@ class Settings:
         self.screen_height = 896
         self.bg_color = (20, 44, 71)
         self.ship_speed_factor = None
-        self.ship_limit = 3
+        self.ship_limit = 0
 
         # Bullet Settings
         self.bullet_speed_factor = None
@@ -55,4 +55,3 @@ class Settings:
         self.alien_speed_factor *= self.speedup_scale
         for i in self.alien_points:
             self.alien_points[i] = int(self.alien_points[i] * self.score_scale)
-            print(self.alien_points[i])
